@@ -17,8 +17,7 @@ verticalSeparator: ---
 
 ### Continuous Integration, Delivery and Deployment
 
-- Merge developer changes into a shared mainline
-- Automate integration checks
+- Merge changes into a shared mainline previa automated integration checks
 - Keep mainline in a production-ready state
 - Deploy mainline automatically
 
@@ -26,10 +25,10 @@ verticalSeparator: ---
 
 ### But why?
 
+- Foster collaboration
 - Enforce best practices
 - Grant confidence and safety
-- Foster collaboration
-- Collect code metrics
+- Collect metrics about source code
 
 _"Release early, release often"_
 
@@ -38,22 +37,19 @@ See "The Cathedral and the Bazaar" by Eric S. Raymond
 
 ---
 
-## The pipeline
+### The pipeline
 
 ![](assets/pipeline.png)
 
 ---
 
-## Let's build something
+### Let's build something
 
 _Demo_
 
 Notes:
-```shell
-mkdir k8s-cd-demo
-git init
-git remote add origin git@gitlab.com:stefanotorresi/k8s-cd-demo.git
-```
+Show a dockerized app running with docker-compose and its Gitlab CI config  
+Mention [Gitlab CI docs](https://docs.gitlab.com/ee/ci/)
 
 ------
 
@@ -62,12 +58,12 @@ git remote add origin git@gitlab.com:stefanotorresi/k8s-cd-demo.git
 - Container orchestration platform
 - Infrastructure abstraction
 - Automates container coordination and management
-- API driven, declarative, stateful
+- API driven, declarative, transparent
 
 Notes:
 - Born from Google's Borg, which was written in C++ instead of Go.
 - Donated to CNCF in 2014
-- The API is fully transparent, there are no hidden internal details. This allows a very high degree of flexibility.
+- The API is fully transparent in the sense that there are no hidden internal details. This allows a very high degree of flexibility.
 
 ---
 
@@ -92,19 +88,19 @@ Notes:
 
 ---
 
-## Caveat Emptor
+### Caveat Emptor
 
 - Very high cognitive overhead
-- Operating a control plane is hard
+- Operating the Control Plane requires significant effort
 - Easy to learn, hard to master
-- Multi-tenancy is a WIP
+- Soft multi-tenancy
 
 Notes:
 Hard multi-tenancy can be achieved by having one cluster per tenant
 
 ---
 
-## Managed master to the rescue
+### Managed Control Plane to the rescue
 
 AKS, GKE, EKS, DOKS, ICKS... all the Ks!!
 
@@ -112,22 +108,22 @@ AKS, GKE, EKS, DOKS, ICKS... all the Ks!!
 
 ---
 
-## Managed master to the rescue
+### Managed master to the rescue
 
 ```shell
 gcloud container clusters create foobar
 ```
 
 ```shell
-aws eks create-cluster --name foobar
-```
-
-```shell
 doctl kubernetes cluster create foobar
 ```
 
+```shell
+aws eks create-cluster --name foobar    # sort of... ;)
+```
+
 Notes:
-Skipping CLI options for brevity, but AWS is actually much more cumbersome than that.
+Skipping CLI options for brevity, but AWS is actually not as easy as just running a command.
 
 ---
 
@@ -135,28 +131,29 @@ _Demo time_
 
 Notes:
 ```shell
-doctl kubernetes cluster create demo \
-    --region fra1 --count 2 --wait
-
 kubectx do-fra1-demo
 
-watch kubectl get nodes
+kubectl cluster-info
 
-kubectl create deployment hello-world \
-    --image=
+doctl kubernetes cluster get demo -o json | jq
 
-kubectl expose deployment hello-world \
+kubectl get nodes -w
+
+kubectl create deployment nginx --image=nginx
+
+kubectl expose deployment nginx \
     --port=80  \
-    --target-port=8080 \
     --type=LoadBalancer
 
-kubectl get deployment hello-world -o yaml
-kubectl get service hello-world -o yaml
+kubectl get service nginx -w
+
+kubectl get deployment nginx -o yaml
+kubectl get service nginx -o yaml
 ```
 
 ---
 
-#### Whole lotta APIs
+### Whole lotta APIs
 
 Container, Pod, Deployments, ReplicaSet, ReplicationController, StatefulSet, DaemonSet, Job, CronJob, Endpoints, Ingress, Service, ConfigMap, Secret, StorageClass, Volume, PersistentVolumeClaim, VolumeAttachment
 
@@ -177,7 +174,7 @@ Notes:
 
 ---
 
-## You can do it
+### The good parts
 
 - Documentation is excellent
 - Plenty of resources available
@@ -185,7 +182,7 @@ Notes:
 
 ---
 
-## The YAMLPOCALYPSE problem
+### The YAMLPOCALYPSE problem
 
 **Deployment example:**
 
@@ -198,16 +195,16 @@ metadata:
   creationTimestamp: null
   generation: 1
   labels:
-    app: hello-world
-  name: hello-world
-  selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/hello-world
+    app: nginx
+  name: nginx
+  selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/nginx
 spec:
   progressDeadlineSeconds: 600
-  replicas: 2
+  replicas: 1
   revisionHistoryLimit: 10
   selector:
     matchLabels:
-      app: hello-world
+      app: nginx
   strategy:
     rollingUpdate:
       maxSurge: 25%
@@ -217,12 +214,12 @@ spec:
     metadata:
       creationTimestamp: null
       labels:
-        app: hello-world
+        app: nginx
     spec:
       containers:
-      - image: registry.gitlab.com/stefanotorresi/k8s-cd-demo:56487b78
-        imagePullPolicy: IfNotPresent
-        name: k8s-cd-demo
+      - image: nginx
+        imagePullPolicy: Always
+        name: nginx
         resources: {}
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
@@ -236,7 +233,7 @@ status: {}
 
 ---
 
-## The YAMLPOCALYPSE problem
+### The YAMLPOCALYPSE problem
 
 **Service example:**
 
@@ -246,18 +243,18 @@ kind: Service
 metadata:
   creationTimestamp: null
   labels:
-    app: hello-world
-  name: hello-world
-  selfLink: /api/v1/namespaces/default/services/hello-world
+    app: nginx
+  name: nginx
+  selfLink: /api/v1/namespaces/default/services/nginx
 spec:
   externalTrafficPolicy: Cluster
   ports:
-  - nodePort: 32276
+  - nodePort: 32243
     port: 80
     protocol: TCP
     targetPort: 80
   selector:
-    app: hello-world
+    app: nginx
   sessionAffinity: None
   type: LoadBalancer
 status:
@@ -273,7 +270,11 @@ Kubernetes on steroids:
 
 - Package and dependency manager
 - Template engine
-- Release tool
+- Release manager
+
+Notes:
+Helm 2 was developed by Deis and Google, merging two projects together  
+Here is a [nice article](https://helm.sh/blog/helm-3-preview-pt1/) on its history, and its future (Helm 3).
 
 ---
 
@@ -293,20 +294,39 @@ Notes:
 
 ![](assets/helm-arch.png)
 
+Notes:
+The server part, Tiller, will be removed in Helm v3.
+
 ---
 
 _Demo time_
 
 Notes:
 ```shell
-kubectl apply -f tiller-rbac.yaml
+kubectl apply -f stuff/tiller-rbac.yaml
 
 helm init --service-account tiller
 
+kubectl get pods -n kube-system -w
+
 helm version
 
-helm inspect stable/external-dns | less
+cd ~/work/foss/helm/docs/examples/nginx && tree
 
+helm install --name helm-test --debug ~/work/foss/helm/docs/examples/nginx --set service.type=NodePort
+```
+
+---
+
+### Time for some goodies
+
+- [nginx-ingress](https://github.com/helm/charts/tree/master/stable/nginx-ingress) routes traffic k8s services
+- [external-dns](https://github.com/helm/charts/tree/master/stable/external-dns) manages DNS records for k8s services
+
+--- 
+
+#### Installing external-dns 
+```
 helm install stable/external-dns \
   --name external-dns \
   --namespace kube-system \
@@ -316,16 +336,35 @@ helm install stable/external-dns \
   --set rbac.create=true \
   --set rbac.serviceAccountName=external-dns \
   --set policy=sync
+```
 
-kubectl annotate service hello-world external-dns.alpha.kubernetes.io/hostname=k8s-cd-demo.torresi.io
+---
 
+#### Installing nginx-ingress
+
+```
 helm install stable/nginx-ingress \
   --name nginx-ingress  \
   --namespace kube-system \
   --set-string controller.config.disable-ipv6=true
 ```
 
+---
+
+
+```
+kubectl annotate service nginx external-dns.alpha.kubernetes.io/hostname=nginx-demo.torresi.io
+```
+
 ------
+
+## Conclusions
+
+- It's not about just scale.
+- It's for when a hosted PaaS does not cut it.
+- It's a seed for the DevOps culture.
+
+---
 
 ## That's all folks
 
