@@ -104,12 +104,6 @@ Hard multi-tenancy can be achieved by having one cluster per tenant
 
 AKS, GKE, EKS, DOKS, ICKS... all the Ks!!
 
-![](assets/minions-rejoice.gif)
-
----
-
-### Managed master to the rescue
-
 ```shell
 gcloud container clusters create foobar
 ```
@@ -122,40 +116,16 @@ doctl kubernetes cluster create foobar
 aws eks create-cluster --name foobar    # sort of... ;)
 ```
 
-Notes:
-Skipping CLI options for brevity, but AWS is actually not as easy as just running a command.
-
----
-
-_Demo time_
+et cetera...
 
 Notes:
-```shell
-kubectx do-fra1-demo
-
-kubectl cluster-info
-
-doctl kubernetes cluster get demo -o json | jq
-
-kubectl get nodes -w
-
-kubectl create deployment nginx --image=nginx
-
-kubectl expose deployment nginx \
-    --port=80  \
-    --type=LoadBalancer
-
-kubectl get service nginx -w
-
-kubectl get deployment nginx -o yaml
-kubectl get service nginx -o yaml
-```
+Skipping CLI options for brevity, also AWS is actually not as easy as just running a command.
 
 ---
 
 ### Whole lotta APIs
 
-Container, Pod, Deployments, ReplicaSet, ReplicationController, StatefulSet, DaemonSet, Job, CronJob, Endpoints, Ingress, Service, ConfigMap, Secret, StorageClass, Volume, PersistentVolumeClaim, VolumeAttachment
+Pod, Deployment, ReplicaSet, ReplicationController, StatefulSet, DaemonSet, Job, CronJob, Ingress, Service, ConfigMap, Secret, StorageClass, Volume, PersistentVolumeClaim, VolumeAttachment
 
 and many others.
 
@@ -174,11 +144,41 @@ Notes:
 
 ---
 
-### The good parts
+### It's complex, but...
 
 - Documentation is excellent
 - Plenty of resources available
-- Community is huge already and vibrant
+- Community is huge and vibrant
+
+---
+
+### The CLI: Kubectl
+
+_Demo time_
+
+Notes:
+```shell
+kubectl cluster-info
+
+doctl kubernetes cluster get demo -o json | jq
+
+kubectl get nodes -w
+
+kubectl create deployment nginx --image=nginx
+
+kubectl explain deployment
+
+kubectl expose deployment nginx \
+    --port=80  \
+    --type=NodePort
+    
+kube get nodes -o jsonpath='{ $.items[*].status.addresses[?(@.type=="ExternalIP")].address }'; echo
+
+kubectl get service nginx -w 
+
+kubectl get deployment nginx -o yaml
+kubectl get service nginx -o yaml
+```
 
 ---
 
@@ -273,6 +273,7 @@ Kubernetes on steroids:
 - Release manager
 
 Notes:
+
 Helm 2 was developed by Deis and Google, merging two projects together  
 Here is a [nice article](https://helm.sh/blog/helm-3-preview-pt1/) on its history, and its future (Helm 3).
 
@@ -295,6 +296,7 @@ Notes:
 ![](assets/helm-arch.png)
 
 Notes:
+
 The server part, Tiller, will be removed in Helm v3.
 
 ---
@@ -318,7 +320,7 @@ helm install --name helm-test --debug ~/work/foss/helm/docs/examples/nginx --set
 
 ---
 
-### Time for some goodies
+### Some goodies, exempli gratia
 
 - [nginx-ingress](https://github.com/helm/charts/tree/master/stable/nginx-ingress) routes traffic k8s services
 - [external-dns](https://github.com/helm/charts/tree/master/stable/external-dns) manages DNS records for k8s services
@@ -351,18 +353,41 @@ helm install stable/nginx-ingress \
 
 ---
 
+### Back to our ToDo app
 
-```
-kubectl annotate service nginx external-dns.alpha.kubernetes.io/hostname=nginx-demo.torresi.io
-```
+_Demo_
 
 ------
 
 ## Conclusions
 
+It's about planting a seed for the DevOps culture.
+
+---
+
+### Kubernetes
+
+- It's hard, but viable, in small cross-functional teams.
 - It's not about just scale.
-- It's for when a hosted PaaS does not cut it.
-- It's a seed for the DevOps culture.
+- Trades in complexity for a lot of flexibility.
+- A hosted PaaS may be enough for you.
+
+---
+
+### Helm
+
+- It helps, but it's not a silver bullet.
+- The CD setup shown is basically like sudoing in the cluster.
+- Alternatives: [dhall-kubernetes][1], [Kustomize][2], [Keel][3], programmatic access to k8s API.
+
+
+  [1]: https://github.com/dhall-lang/dhall-kubernetes
+  [2]: https://github.com/kubernetes-sigs/kustomize
+  [3]: https://keel.sh
+
+Notes:
+
+Dhall tag line is "The non-repetitive alternative to YAML"
 
 ---
 
