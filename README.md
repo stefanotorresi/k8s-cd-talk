@@ -8,7 +8,7 @@ You can browse the presentation at [stefanotorresi.it/talks/k8s-cd](https://stef
 
 ## Run
 
-The `slides.md` is a RevealJS presentation meant to be run with [reveal-md][https://github.com/webpro/reveal-md]
+The `slides.md` is a RevealJS presentation meant to be run with [reveal-md](https://github.com/webpro/reveal-md)
 
 ```shell
 $ reveal-md slides.md
