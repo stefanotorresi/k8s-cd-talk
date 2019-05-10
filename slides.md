@@ -21,16 +21,21 @@ verticalSeparator: ---
 - Keep mainline in a production-ready state
 - Deploy mainline automatically
 
+Notes:
+
+CI is tightly related to TDD and XP.
+Feature toggles are a way to merge incomplete features. 
+
 ---
 
 ### But why?
+
+_"Release early, release often"_
 
 - Foster collaboration
 - Enforce best practices
 - Grant confidence and safety
 - Collect metrics about source code
-
-_"Release early, release often"_
 
 Notes:
 See "The Cathedral and the Bazaar" by Eric S. Raymond
@@ -48,6 +53,7 @@ See "The Cathedral and the Bazaar" by Eric S. Raymond
 _Demo_
 
 Notes:
+
 Show a dockerized app running with docker-compose and its Gitlab CI config  
 Mention [Gitlab CI docs](https://docs.gitlab.com/ee/ci/)
 
@@ -61,6 +67,7 @@ Mention [Gitlab CI docs](https://docs.gitlab.com/ee/ci/)
 - API driven, declarative, transparent
 
 Notes:
+
 - Born from Google's Borg, which was written in C++ instead of Go.
 - Donated to CNCF in 2014
 - The API is fully transparent in the sense that there are no hidden internal details. This allows a very high degree of flexibility.
@@ -72,6 +79,7 @@ Notes:
 ![](assets/k8s-arch.png)
 
 Notes:
+
 - Losely-coupled, master-worker
 - Cluster centric, as opposed to how Docker Swarm is designed, which scales out from a single Docker host and then incrementally joining others.
 - Master is a.k.a. the cluster control plane.
@@ -96,6 +104,7 @@ Notes:
 - Soft multi-tenancy
 
 Notes:
+
 Hard multi-tenancy can be achieved by having one cluster per tenant
 
 ---
@@ -119,6 +128,7 @@ aws eks create-cluster --name foobar    # sort of... ;)
 et cetera...
 
 Notes:
+
 Skipping CLI options for brevity, also AWS is actually not as easy as just running a command.
 
 ---
@@ -157,6 +167,7 @@ Notes:
 _Demo time_
 
 Notes:
+
 ```shell
 kubectl cluster-info
 
@@ -304,6 +315,7 @@ The server part, Tiller, will be removed in Helm v3.
 _Demo time_
 
 Notes:
+
 ```shell
 kubectl apply -f stuff/tiller-rbac.yaml
 
