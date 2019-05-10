@@ -360,7 +360,8 @@ helm install stable/external-dns \
 helm install stable/nginx-ingress \
   --name nginx-ingress  \
   --namespace kube-system \
-  --set-string controller.config.disable-ipv6=true
+  --set controller.config.disable-ipv6=true
+  --set controller.publishService.enabled=true
 ```
 
 ---
